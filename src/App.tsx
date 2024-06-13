@@ -1,35 +1,31 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+import { SocketProvider } from './contexts/SocketContext';
+import Editor from './components/Editor';
+import UserPresence from './components/UserPresence';
+import VersionHistory from './components/VersionHistory';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from './firebaseConfig';
 
-function App() {
-  const [count, setCount] = useState(0);
+const App = () => {
+  const [user, loading] = useAuthState(auth);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <SocketProvider>
+      <div className="container mx-auto p-4">
+        <h1 className="text-4xl font-bold mb-4">SyncNote</h1>
+        {user ? (
+          <>
+            <UserPresence />
+            <Editor />
+            <VersionHistory />
+          </>
+        ) : (
+          <div>Please log in to use the application.</div>
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </SocketProvider>
   );
-}
+};
 
 export default App;
