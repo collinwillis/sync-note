@@ -1,3 +1,4 @@
+// /server/src/index.ts
 import express, { Request, Response } from 'express';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
@@ -5,45 +6,60 @@ import cors from 'cors';
 
 interface User {
   id: string;
-  name: string;
+  email: string;
+  noteId: string;
 }
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST'],
+  }),
+);
 
 const server = createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST'],
   },
 });
 
-const users: User[] = [];
+const users: { [key: string]: User[] } = {};
 
 io.on('connection', (socket: Socket) => {
   console.log('a user connected:', socket.id);
 
-  socket.on('send-update', (content: string) => {
-    socket.broadcast.emit('receive-update', content);
-  });
-
-  socket.on('user-joined', (user: User) => {
-    users.push(user);
-    io.emit('user-joined', user);
-  });
-
-  socket.on('user-left', (user: User) => {
-    const index = users.findIndex((u) => u.id === user.id);
-    if (index > -1) {
-      users.splice(index, 1);
+  socket.on('join-note', ({ user, noteId }) => {
+    socket.join(noteId);
+    if (!users[noteId]) {
+      users[noteId] = [];
     }
-    io.emit('user-left', user);
+    users[noteId].push({ ...user, noteId });
+    io.to(noteId).emit('current-users', users[noteId]);
+    console.log(users);
+  });
+
+  socket.on('send-update', (content: string, noteId: string) => {
+    socket.to(noteId).emit('receive-update', content);
+  });
+
+  socket.on('leave-note', ({ user, noteId }) => {
+    socket.leave(noteId);
+    if (users[noteId]) {
+      users[noteId] = users[noteId].filter((u) => u.id !== user.id);
+      io.to(noteId).emit('current-users', users[noteId]);
+    }
   });
 
   socket.on('disconnect', () => {
     console.log('user disconnected:', socket.id);
+    for (const noteId in users) {
+      users[noteId] = users[noteId].filter((u) => u.id !== socket.id);
+      io.to(noteId).emit('current-users', users[noteId]);
+    }
   });
 });
 

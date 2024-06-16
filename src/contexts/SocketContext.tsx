@@ -1,46 +1,37 @@
-// src/contexts/SocketContext.tsx
-import { createContext, useContext, useEffect, useRef, ReactNode } from 'react';
-import io, { Socket } from 'socket.io-client';
-import { useContentStore, useUserStore } from '../store/store';
+import { createContext, useContext, ReactNode, useEffect } from 'react';
+import { socket } from '../socket';
+import { useUserStore } from '../store/store';
+import { User } from '../models/User';
 
-// Create a context for the socket
-const SocketContext = createContext<Socket | null>(null);
+const SocketContext = createContext(socket);
 
-// Custom hook to use the socket context
 export const useSocket = () => useContext(SocketContext);
 
 interface SocketProviderProps {
   children: ReactNode;
 }
 
-// SocketProvider component
 export const SocketProvider = ({ children }: SocketProviderProps) => {
-  const setContent = useContentStore((state) => state.setContent);
   const addUser = useUserStore((state) => state.addUser);
   const removeUser = useUserStore((state) => state.removeUser);
-  const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    // Initialize Socket.IO client
-    const socket = io('http://localhost:4000');
-    socketRef.current = socket;
+    socket.on('user-joined', (user: User) => {
+      console.log('User joined (SocketContext):', user);
+      addUser(user.email);
+    });
+    socket.on('user-left', (user: User) => {
+      console.log('User left (SocketContext):', user);
+      removeUser(user.email);
+    });
 
-    // Setup socket event listeners
-    socket.on('receive-update', setContent);
-    socket.on('user-joined', addUser);
-    socket.on('user-left', removeUser);
-
-    // Cleanup on unmount
     return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
+      socket.off('user-joined');
+      socket.off('user-left');
     };
-  }, [setContent, addUser, removeUser]);
+  }, [addUser, removeUser]);
 
   return (
-    <SocketContext.Provider value={socketRef.current}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
   );
 };
