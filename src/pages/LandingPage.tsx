@@ -1,5 +1,3 @@
-import Navigation from '../components/Navigation';
-
 const LandingPage = () => {
   return (
     <div>

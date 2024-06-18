@@ -1,3 +1,5 @@
+// /Users/collinwillis/Dev/Personal/sync-note/src/App.tsx
+
 import { useEffect, useState } from 'react';
 import {
   BrowserRouter as Router,
@@ -62,46 +64,55 @@ const App = () => {
     };
   }, [firebaseUser, setUser]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-backgroundPrimary text-content1">
+        Loading...
+      </div>
+    );
 
   return (
     <Router>
-      <Navigation />
-      <Routes>
-        <Route
-          path="/"
-          element={firebaseUser ? <Navigate to="/app" /> : <LandingPage />}
-        />
-        <Route
-          path="/login"
-          element={firebaseUser ? <Navigate to="/app" /> : <Login />}
-        />
-        <Route
-          path="/signup"
-          element={firebaseUser ? <Navigate to="/app" /> : <Signup />}
-        />
-        <Route
-          path="/app"
-          element={firebaseUser ? <NoteGallery /> : <Login />}
-        />
-        <Route
-          path="/app/:noteId"
-          element={firebaseUser ? <MainApp /> : <Login />}
-        />
-      </Routes>
-      {isConnected ? (
-        <p className="text-green-500">Connected</p>
-      ) : (
-        <p className="text-red-500">Disconnected</p>
-      )}
+      <div className="min-h-screen flex flex-col bg-backgroundPrimary text-content1">
+        <Navigation />
+        <div className="flex-grow flex flex-col items-center justify-center mt-16 px-4">
+          <Routes>
+            <Route
+              path="/"
+              element={firebaseUser ? <Navigate to="/app" /> : <LandingPage />}
+            />
+            <Route
+              path="/login"
+              element={firebaseUser ? <Navigate to="/app" /> : <Login />}
+            />
+            <Route
+              path="/signup"
+              element={firebaseUser ? <Navigate to="/app" /> : <Signup />}
+            />
+            <Route
+              path="/app"
+              element={firebaseUser ? <NoteGallery /> : <Login />}
+            />
+            <Route
+              path="/app/:noteId"
+              element={firebaseUser ? <MainApp /> : <Login />}
+            />
+          </Routes>
+        </div>
+        {isConnected ? (
+          <p className="text-green-500 text-center">Connected</p>
+        ) : (
+          <p className="text-red-500 text-center">Disconnected</p>
+        )}
+      </div>
     </Router>
   );
 };
 
 const MainApp = () => (
   <SocketProvider>
-    <div className="container mx-auto">
-      <h1 className="text-4xl font-bold mb-4">SyncNote</h1>
+    <div className="container mx-auto px-4 pt-8">
+      <h1 className="text-4xl font-bold mb-4 text-center">SyncNote</h1>
       <UserPresence />
       <Editor />
     </div>

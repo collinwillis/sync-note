@@ -1,42 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Define the CSS variables */
+:root {
+  --backgroundPrimary: #F8F9FA; /* Light mode primary background */
+  --backgroundSecondary: #FFFFFF; /* Light mode secondary background */
+  --primary: #007AFF; /* Light mode primary color */
+  --primary-dark: #005CFF; /* Light mode primary dark color */
+  --content1: #000000; /* Light mode primary text color */
+}
+
+/* Dark mode variables */
+[data-theme="dark"] {
+  --backgroundPrimary: #1C1C1E; /* Dark mode primary background */
+  --backgroundSecondary: #2C2C2E; /* Dark mode secondary background */
+  --primary: #0A84FF; /* Dark mode primary color */
+  --primary-dark: #0048CC; /* Dark mode primary dark color */
+  --content1: #FFFFFF; /* Dark mode primary text color */
+}
+
+/* Additional custom styles */
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
+  padding-top: 4rem; /* Add padding at the top to account for the navbar */
+  background-color: var(--backgroundPrimary); /* Use theme background color */
+  color: var(--content1); /* Use theme text color */
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Example styling for the navbar */
+.navbar {
+  background-color: var(--backgroundSecondary);
+  color: var(--content1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem 2rem;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.navbar a {
+  color: var(--content1);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.navbar a:hover {
+  color: var(--primary);
 }
 
-.card {
-  padding: 2em;
+/* Example styling for buttons */
+button {
+  background-color: var(--primary);
+  color: var(--content1);
+  border: none;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.read-the-docs {
-  color: #888;
+button:hover {
+  background-color: var(--primary-dark);
 }

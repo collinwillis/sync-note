@@ -1,4 +1,3 @@
-// /src/store/store.ts
 import { create } from 'zustand';
 import { User } from '../models/User';
 
@@ -23,21 +22,21 @@ export const useContentStore = create<ContentState>((set) => ({
 }));
 
 interface UserListState {
-  users: string[];
-  addUser: (email: string) => void;
+  users: User[];
+  addUser: (user: User) => void;
   removeUser: (email: string) => void;
-  setUsers: (emails: string[]) => void;
+  setUsers: (users: User[]) => void;
 }
 
 export const useUserStore = create<UserListState>((set) => ({
   users: [],
-  addUser: (email) =>
+  addUser: (user) =>
     set((state) => ({
-      users: state.users.includes(email)
+      users: state.users.some((u) => u.email === user.email)
         ? state.users
-        : [...state.users, email],
+        : [...state.users, user],
     })),
   removeUser: (email) =>
-    set((state) => ({ users: state.users.filter((u) => u !== email) })),
-  setUsers: (emails) => set({ users: [...new Set(emails)] }),
+    set((state) => ({ users: state.users.filter((u) => u.email !== email) })),
+  setUsers: (users) => set({ users }),
 }));

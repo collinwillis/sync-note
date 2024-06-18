@@ -1,3 +1,4 @@
+// /src/components/Signup.tsx
 import { useState } from 'react';
 import { useCreateUserWithEmailAndPassword } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebaseConfig';
@@ -37,44 +38,56 @@ const Signup = () => {
   };
 
   return (
-    <div className="signup-container">
+    <div className="signup-container bg-backgroundPrimary text-content1 min-h-screen flex flex-col items-center justify-center">
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
+        className="border border-border rounded-lg p-2 mb-4"
       />
       <input
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Password"
+        className="border border-border rounded-lg p-2 mb-4"
       />
       <input
         type="text"
         value={firstName}
         onChange={(e) => setFirstName(e.target.value)}
         placeholder="First Name"
+        className="border border-border rounded-lg p-2 mb-4"
       />
       <input
         type="text"
         value={lastName}
         onChange={(e) => setLastName(e.target.value)}
         placeholder="Last Name"
+        className="border border-border rounded-lg p-2 mb-4"
       />
       <input
         type="text"
         value={profilePicture}
         onChange={(e) => setProfilePicture(e.target.value)}
         placeholder="Profile Picture URL"
+        className="border border-border rounded-lg p-2 mb-4"
       />
-      <button onClick={handleSignup} disabled={loading}>
+      <button
+        onClick={handleSignup}
+        disabled={loading}
+        className="bg-primary text-content1 rounded-lg px-4 py-2 mb-4"
+      >
         Sign Up
       </button>
-      {error && <p>{error.message}</p>}
+      {error && <p className="text-red-500">{error.message}</p>}
       {loading && <p>Loading...</p>}
       <p>
-        Already have an account? <Link to="/login">Login</Link>
+        Already have an account?{' '}
+        <Link to="/login" className="text-primary">
+          Login
+        </Link>
       </p>
     </div>
   );

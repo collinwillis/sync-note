@@ -37,7 +37,13 @@ io.on('connection', (socket: Socket) => {
     if (!users[noteId]) {
       users[noteId] = [];
     }
-    users[noteId].push({ ...user, noteId });
+    // Check if user already exists in the note
+    const userExists = users[noteId].some(
+      (existingUser) => existingUser.id === user.id,
+    );
+    if (!userExists) {
+      users[noteId].push({ ...user, noteId });
+    }
     io.to(noteId).emit('current-users', users[noteId]);
     console.log(users);
   });

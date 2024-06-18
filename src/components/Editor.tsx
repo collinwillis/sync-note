@@ -1,23 +1,18 @@
-// /src/components/Editor.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebaseConfig';
-import { useContentStore, useUserStore } from '../store/store';
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  onSnapshot,
-  arrayUnion,
-} from 'firebase/firestore';
+import { useContentStore } from '../store/store';
+import { doc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { debounce } from 'lodash';
+import { useSocket } from '../contexts/SocketContext';
 
 const Editor = () => {
   const { noteId } = useParams();
   const content = useContentStore((state) => state.content);
   const setContent = useContentStore((state) => state.setContent);
   const [user] = useAuthState(auth);
-  const [inviteEmail, setInviteEmail] = useState('');
+  const socket = useSocket();
 
   useEffect(() => {
     if (user && noteId) {
@@ -33,40 +28,50 @@ const Editor = () => {
     }
   }, [user, noteId, setContent]);
 
-  const handleChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const updateContent = useCallback(
+    debounce(async (newContent: string) => {
+      if (user && noteId) {
+        const docRef = doc(db, 'notes', noteId);
+        await updateDoc(docRef, { content: newContent });
+      }
+    }, 1000),
+    [user, noteId],
+  );
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
-
-    if (user && noteId) {
-      const docRef = doc(db, 'notes', noteId);
-      await updateDoc(docRef, { content: e.target.value });
-    }
+    socket.emit('send-update', e.target.value, noteId);
+    updateContent(e.target.value);
   };
 
-  const handleInvite = async () => {
-    if (inviteEmail && noteId) {
-      const noteRef = doc(db, 'notes', noteId);
-      await updateDoc(noteRef, {
-        collaborators: arrayUnion(inviteEmail),
-      });
-    }
-  };
+  useEffect(() => {
+    socket.on('receive-update', (updatedContent: string) => {
+      setContent(updatedContent);
+    });
+
+    return () => {
+      socket.off('receive-update');
+    };
+  }, [socket, setContent]);
 
   return (
-    <div>
-      <textarea
-        value={content}
-        onChange={handleChange}
-        className="textarea w-full h-90vh p-4 text-lg"
-        disabled={!user}
-      />
-      <div className="invite-section">
-        <input
-          type="email"
-          value={inviteEmail}
-          onChange={(e) => setInviteEmail(e.target.value)}
-          placeholder="Invite user by email"
+    <div className="bg-transparent min-h-screen flex justify-center items-start text-content1">
+      <div className="editor-container bg-backgroundSecondary rounded-lg overflow-hidden relative aspect-[8.5/11]">
+        <textarea
+          value={content}
+          onChange={handleChange}
+          className="textarea w-full h-full text-lg border-none focus:outline-none resize-none bg-backgroundSecondary text-content1"
+          disabled={!user}
+          style={{
+            height: 'calc(100vh - 10rem)',
+            width: '8.5in',
+            maxWidth: '100%',
+            margin: '0 auto',
+            padding: '1in',
+            boxSizing: 'border-box',
+            overflow: 'hidden',
+          }}
         />
-        <button onClick={handleInvite}>Invite</button>
       </div>
     </div>
   );

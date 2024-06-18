@@ -14,9 +14,10 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    signInWithEmailAndPassword(email, password).then((userCredential) => {
-      if (userCredential) {
-        const user = userCredential.user;
+    console.log(userCredential);
+    signInWithEmailAndPassword(email, password).then((userCredentials) => {
+      if (userCredentials) {
+        const user = userCredentials.user;
         setUser({ id: user.uid, email: user.email || '' });
         navigate('/app');
       }
@@ -24,26 +25,35 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
+    <div className="login-container p-6 bg-backgroundPrimary dark:bg-backgroundSecondary text-content1 dark:text-content2">
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
+        className="block w-full mb-4 p-2 border border-border rounded"
       />
       <input
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Password"
+        className="block w-full mb-4 p-2 border border-border rounded"
       />
-      <button onClick={handleLogin} disabled={loading}>
+      <button
+        onClick={handleLogin}
+        disabled={loading}
+        className="w-full py-2 mb-4 bg-primary text-white rounded"
+      >
         Login
       </button>
-      {error && <p>{error.message}</p>}
+      {error && <p className="text-red-500">{error.message}</p>}
       {loading && <p>Loading...</p>}
-      <p>
-        Don't have an account? <Link to="/signup">Sign up</Link>
+      <p className="text-center">
+        Don't have an account?{' '}
+        <Link to="/signup" className="text-primary hover:underline">
+          Sign up
+        </Link>
       </p>
     </div>
   );
